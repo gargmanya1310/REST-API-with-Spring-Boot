@@ -2,6 +2,8 @@ package com.demo.springboot.firstrestapi.survey;
 
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,10 +68,39 @@ public class SurveyService
         return optionalQuestion.get();
     }
 
-
-    public void addNewSurveyQuestion(String surveyId, Question question)
-    {
+    public String addNewSurveyQuestion(String surveyId, Question question) {
         List<Question> questions = retrieveAllSurveyQuestions(surveyId);
+        question.setId(generateRandomId());
+        questions.add(question);
+        return question.getId();
+    }
+
+    private String generateRandomId() {
+        SecureRandom secureRandom = new SecureRandom();
+        String randomId = new BigInteger(32, secureRandom).toString();
+        return randomId;
+    }
+
+    public String deleteSurveyQuestion(String surveyId, String questionId)
+    {
+        List<Question> surveyQuestions = retrieveAllSurveyQuestions(surveyId);
+
+        if (surveyQuestions == null)
+            return null;
+
+
+        Predicate<? super Question> predicate = q -> q.getId().equalsIgnoreCase(questionId);
+        boolean removed = surveyQuestions.removeIf(predicate);
+
+        if(!removed) return null;
+
+        return questionId;
+    }
+
+    public void updateSurveyQuestion(String surveyId, String questionId, Question question) {
+        List<Question> questions = retrieveAllSurveyQuestions(surveyId);
+        questions.removeIf(q -> q.getId().equalsIgnoreCase(questionId));
         questions.add(question);
     }
+
 }
